@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoutubeEnchanted", "YoutubeEnchanted\YoutubeEnchanted.csproj", "{B6BD88D3-07A8-4E89-A773-141D73D3B57E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoutubeEnchanted.Installer", "YoutubeEnchanted.Installer\YoutubeEnchanted.Installer.csproj", "{4A94E7F0-5A25-446C-8FF3-F3D17ACC00C1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B6BD88D3-07A8-4E89-A773-141D73D3B57E}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{B6BD88D3-07A8-4E89-A773-141D73D3B57E}.Debug|x64.ActiveCfg = Debug|x64
+		{B6BD88D3-07A8-4E89-A773-141D73D3B57E}.Release|Any CPU.ActiveCfg = Release|x64
+		{B6BD88D3-07A8-4E89-A773-141D73D3B57E}.Release|x64.ActiveCfg = Release|x64
+		{B6BD88D3-07A8-4E89-A773-141D73D3B57E}.Release|x64.Build.0 = Release|x64
+		{4A94E7F0-5A25-446C-8FF3-F3D17ACC00C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A94E7F0-5A25-446C-8FF3-F3D17ACC00C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A94E7F0-5A25-446C-8FF3-F3D17ACC00C1}.Debug|x64.ActiveCfg = Debug|x64
+		{4A94E7F0-5A25-446C-8FF3-F3D17ACC00C1}.Debug|x64.Build.0 = Debug|x64
+		{4A94E7F0-5A25-446C-8FF3-F3D17ACC00C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A94E7F0-5A25-446C-8FF3-F3D17ACC00C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A94E7F0-5A25-446C-8FF3-F3D17ACC00C1}.Release|x64.ActiveCfg = Release|x64
+		{4A94E7F0-5A25-446C-8FF3-F3D17ACC00C1}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E01F8823-D568-4005-96E8-AD9EB10CF69F}
+	EndGlobalSection
+EndGlobal
