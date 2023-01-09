@@ -43,6 +43,7 @@
             this.TopicShower.Name = "TopicShower";
             this.TopicShower.Size = new System.Drawing.Size(1325, 811);
             this.TopicShower.TabIndex = 0;
+            this.TopicShower.Paint += new System.Windows.Forms.PaintEventHandler(this.TopicShower_Paint);
             // 
             // MainPage
             // 

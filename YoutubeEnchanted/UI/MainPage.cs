@@ -63,5 +63,18 @@ namespace YoutubeEnchanted.UI
         {
 
         }
+
+        public void StartSerch(string topic)
+        {
+            TopicShower.Controls.Clear();
+            createtmp = 0;
+            AddTopic(topic);
+            
+        }
+
+        private void TopicShower_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }

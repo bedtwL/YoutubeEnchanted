@@ -41,7 +41,8 @@ namespace YoutubeEnchanted.UI
         private async void UpdateVideo()
         {
             try {
-                YoutubeExplode.YoutubeClient yt = new YoutubeExplode.YoutubeClient();
+                YoutubeExplode.YoutubeClient yt = new YoutubeExplode.YoutubeClient(APICore.HttpClient());
+                APICore.Log("Getting metadata from "+videoURL);
                 try
                 {
                     var vid = await yt.Videos.GetAsync(videoURL);
@@ -50,10 +51,13 @@ namespace YoutubeEnchanted.UI
                     pictureBox1.LoadAsync(vid.Thumbnails.GetWithHighestResolution().Url);
                     var us = await yt.Channels.GetAsync(vid.Author.ChannelUrl);
                     pictureBox2.LoadAsync(us.Thumbnails[0].Url);
+                    APICore.Log("Metadata Geted ("+videoURL+")");
 
                 }
                 catch (YoutubeExplode.Exceptions.RequestLimitExceededException ex)
                 {
+                    APICore.Log(ex.Message);
+                    APICore.Log(ex.StackTrace);
                     Program.errorForm = new ErrorUI.Common.YoutubeLimted();
                     Program.error = true;
 
@@ -74,6 +78,33 @@ namespace YoutubeEnchanted.UI
         {
             //API.APICore.Log("Playing "+videoURL);
             Play(videoURL,Topics);
+        }
+
+        private void pictureBox1_MouseEnter(object sender, EventArgs e)
+        {
+            foreach (Control control in this.Controls)
+            {
+                control.BackColor = Color.Black;
+                control.ForeColor = Color.White;
+            }
+            this.BackColor= Color.Black;
+            this.Location = new Point(this.Location.X - 10, this.Location.Y -10);
+            this.Size = new Size(this.Width+20,this.Height+20);
+            try {this.BringToFront(); } catch (Exception ex) { APICore.Log(ex.Message); APICore.Log(ex.StackTrace); }
+        }
+
+        private void pictureBox1_MouseLeave(object sender, EventArgs e)
+        {
+            foreach (Control control in this.Controls)
+            {
+                control.BackColor = Color.White;
+                control.ForeColor = Color.Black;
+            }
+            this.BackColor = Color.White;
+            this.Location = new Point(this.Location.X+10,this.Location.Y+10);
+            this.Size = new Size(this.Width - 20, this.Height- 20);
+            try { this.SendToBack(); } catch(Exception ex) { APICore.Log(ex.Message);APICore.Log(ex.StackTrace); }
+            
         }
     }
 }

@@ -13,6 +13,8 @@ using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 using System.Windows.Forms;
 using Vlc.DotNet.Forms;
+using System.Net.Http;
+using System.Data.Common;
 
 namespace YoutubeEnchanted.API
 {
@@ -31,9 +33,16 @@ namespace YoutubeEnchanted.API
         public static bool ShowPlayControlMenu = false;
         //public static void ResetCore()
         //{
-            //videoPlayCore.Dispose();
-            //videoPlayCore=new VlcControl() { Dock = DockStyle.Fill, VlcLibDirectory = new System.IO.DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "VLCLIBx64") };
+        //videoPlayCore.Dispose();
+        //videoPlayCore=new VlcControl() { Dock = DockStyle.Fill, VlcLibDirectory = new System.IO.DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "VLCLIBx64") };
         //}
+        public static HttpClient HttpClient()
+        {
+            HttpClientHandler handler = new HttpClientHandler();
+            handler.UseCookies= true;
+            handler.CookieContainer=new System.Net.CookieContainer();
+            return new System.Net.Http.HttpClient(handler);
+        }
         public static void UpdateURL()
         {
             try { NOW_URL = UPDATED_LIST[VideoINDEX]; } catch { }
@@ -64,7 +73,7 @@ namespace YoutubeEnchanted.API
             try
             {
 
-                var youtube = new YoutubeClient();
+                var youtube = new YoutubeExplode.YoutubeClient(APICore.HttpClient());
                 var video = await youtube.Videos.GetAsync(url);
                 var streamManifest = await youtube.Videos.Streams.GetManifestAsync(url);
                 var streamInfo = streamManifest.GetMuxedStreams().GetWithHighestBitrate();
@@ -112,10 +121,12 @@ namespace YoutubeEnchanted.API
             try
             {
 
-                var youtube = new YoutubeClient();
+                var youtube = new YoutubeExplode.YoutubeClient(APICore.HttpClient());
                 var streamManifest = await youtube.Videos.Streams.GetManifestAsync(url);
-                var streamInfo = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality();
+                IVideoStreamInfo streamInfo;
+                try { streamInfo = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality();  } catch(Exception ex) { Program.errorForm = new ErrorUI.Common.UnknowError(ex);Program.error = true; return; }
                 PARSE_URL = streamInfo.Url;
+
             }
             catch (YoutubeExplode.Exceptions.RequestLimitExceededException ex)
             {

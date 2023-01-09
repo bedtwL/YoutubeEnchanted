@@ -34,7 +34,7 @@ namespace YoutubeEnchanted.UI
         string nowurl="";
         private async void UpdateVideo(string id, string top)
         {
-            var youtube = new YoutubeClient();
+            var youtube = new YoutubeExplode.YoutubeClient(APICore.HttpClient());
             flowLayoutPanel1.Controls.Clear();
             foreach (var result in await youtube.Search.GetVideosAsync(id).CollectAsync(20))
             {
@@ -47,10 +47,11 @@ namespace YoutubeEnchanted.UI
 
             }
         }
+        private MainPage MainSec;
         private async void Tick()
         {
             await Task.Delay(1000);
-            this.Controls.Add(new UI.MainPage() { Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom, Size = this.Size });
+            this.Controls.Add(MainSec= new UI.MainPage() { Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom, Size = this.Size });
             do
             {
                 try
@@ -103,6 +104,7 @@ namespace YoutubeEnchanted.UI
                             label5.Visible = true;
                             label3.Visible = true;
                             label2.Visible = true;
+
                             flowLayoutPanel1.Visible = true;
                             nowurl = APICore._PARSE_URL;
                             panel2.Visible = true;
@@ -159,6 +161,21 @@ namespace YoutubeEnchanted.UI
                     }
                     if (Program.error)
                     {
+                        this.panel3 = new System.Windows.Forms.Panel();
+                        // 
+                        // panel3
+                        // 
+                        this.panel3.Anchor = System.Windows.Forms.AnchorStyles.None;
+                        this.panel3.AutoScroll = true;
+                        this.panel3.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+
+                        this.panel3.Location = new System.Drawing.Point(143, 31);
+                        this.panel3.Name = "panel3";
+                        this.panel3.Size = new System.Drawing.Size(945, 627);
+                        this.panel3.TabIndex = 14;
+                        this.panel3.Visible = false;
+                        this.panel3.ControlAdded += new System.Windows.Forms.ControlEventHandler(this.panel3_ControlAdded);
+                        this.panel3.Paint += new System.Windows.Forms.PaintEventHandler(this.panel3_Paint);
                         panel3.Controls.Add(Program.errorForm);
                         return;
                     }
@@ -173,7 +190,7 @@ namespace YoutubeEnchanted.UI
         {
             try
             {
-                YoutubeExplode.YoutubeClient yt = new YoutubeExplode.YoutubeClient();
+                YoutubeExplode.YoutubeClient yt = new YoutubeExplode.YoutubeClient(new System.Net.Http.HttpClient());
                 try
                 {
                     var vid = await yt.Videos.GetAsync(vidUrl);
@@ -261,6 +278,46 @@ namespace YoutubeEnchanted.UI
         private void panel3_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void BGN_VIDEO_KeyUp(object sender, KeyEventArgs e)
+        {
+            switch(e.KeyCode) 
+            {
+                case Keys.Enter:
+                    MainSec.StartSerch(textBox1.Text);
+                    textBox1.Text = "";
+                    break;
+                case Keys.Space:
+                    try { videoPlayCore.Pause(); } catch(Exception ex) { APICore.Log("User Press Space but "+ex.Message); APICore.Log(ex.StackTrace); }
+                    break;
+
+          
+            }
+        }
+
+        private void pictureBox5_Click(object sender, EventArgs e)
+        {
+            MainSec.StartSerch(textBox1.Text);
+            APICore.ShowPlayControlMenu = false;
+            textBox1.Text = "";
+        }
+        int createsize = 10;
+        private void flowLayoutPanel1_ControlAdded(object sender, ControlEventArgs e)
+        {
+            createsize = e.Control.Size.Height + createsize;
+            e.Control.Location = new Point(10, createsize);
+        }
+
+        private void flowLayoutPanel1_ControlRemoved(object sender, ControlEventArgs e)
+        {
+            try { flowLayoutPanel1.Controls[-1].Location = e.Control.Location; } catch(Exception ex) { APICore.Log(ex.Message);APICore.Log(ex.StackTrace); }
+  
         }
     }
 }

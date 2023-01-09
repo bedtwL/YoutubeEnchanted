@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YoutubeEnchanted.API;
 using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Search;
@@ -20,6 +21,7 @@ namespace YoutubeEnchanted.UI
         {
             InitializeComponent();
             label1.Text= topid;
+            API.APICore.Log("Serching "+topid);
             UpdateVideo(topid,topid);
         }
 
@@ -34,7 +36,7 @@ namespace YoutubeEnchanted.UI
         }
         private async void UpdateVideo(string id,string top)
         {
-            var youtube = new YoutubeClient();
+            var youtube = new YoutubeExplode.YoutubeClient(new System.Net.Http.HttpClient());
             foreach (var result in await youtube.Search.GetVideosAsync(id).CollectAsync(20) )
             {
                 if (flowLayoutPanel1.Controls.Count == 20)
@@ -49,6 +51,23 @@ namespace YoutubeEnchanted.UI
         private async void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+        int createsize=10;
+        private void flowLayoutPanel1_ControlAdded(object sender, ControlEventArgs e)
+        {
+            createsize = e.Control.Size.Width + createsize;
+            e.Control.Location = new Point(createsize, 10);
+        }
+
+        private void flowLayoutPanel1_ControlRemoved(object sender, ControlEventArgs e)
+        {
+
+            try { flowLayoutPanel1.Controls[-1].Location = e.Control.Location; } catch (Exception ex) { APICore.Log(ex.Message); APICore.Log(ex.StackTrace); }
         }
     }
 }

@@ -108,6 +108,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\APICore.cs" />
+    <Compile Include="ErrorUI\Common\IOError.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ErrorUI\Common\IOError.Designer.cs">
+      <DependentUpon>IOError.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ErrorUI\Common\UnknowError.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ErrorUI\Common\UnknowError.Designer.cs">
+      <DependentUpon>UnknowError.cs</DependentUpon>
+    </Compile>
     <Compile Include="ErrorUI\Common\YoutubeLimted.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -158,6 +170,12 @@
     <Compile Include="UI\VideoPlayerPage.Designer.cs">
       <DependentUpon>VideoPlayerPage.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="ErrorUI\Common\IOError.resx">
+      <DependentUpon>IOError.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ErrorUI\Common\UnknowError.resx">
+      <DependentUpon>UnknowError.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ErrorUI\Common\YoutubeLimted.resx">
       <DependentUpon>YoutubeLimted.cs</DependentUpon>
     </EmbeddedResource>
@@ -227,6 +245,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\error.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Search_Icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
