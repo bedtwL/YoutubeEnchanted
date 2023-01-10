@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -12,6 +15,9 @@ using Vlc.DotNet.Forms;
 using YoutubeEnchanted.API;
 using YoutubeExplode;
 using YoutubeExplode.Common;
+using YoutubeExplode.Converter;
+using YoutubeExplode.Exceptions;
+using YoutubeExplode.Videos.Streams;
 using static YoutubeEnchanted.API.APICore;
 
 namespace YoutubeEnchanted.UI
@@ -22,19 +28,21 @@ namespace YoutubeEnchanted.UI
         public BGN_VIDEO()
         {
             InitializeComponent();
+     
 
-         
+
 
         }
         private void VideoPlayCore_Log(object sender, Vlc.DotNet.Core.VlcMediaPlayerLogEventArgs e)
         {
             API.APICore.Log(e.Message);
-           
+
         }
-        string nowurl="";
+        string nowurl = "";
         private async void UpdateVideo(string id, string top)
         {
             var youtube = new YoutubeExplode.YoutubeClient(APICore.HttpClient());
+            createsize = 10;
             flowLayoutPanel1.Controls.Clear();
             foreach (var result in await youtube.Search.GetVideosAsync(id).CollectAsync(20))
             {
@@ -51,14 +59,16 @@ namespace YoutubeEnchanted.UI
         private async void Tick()
         {
             await Task.Delay(1000);
-            this.Controls.Add(MainSec= new UI.MainPage() { Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom, Size = this.Size });
+            this.Controls.Add(MainSec = new UI.MainPage() { Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom, Size = this.Size });
+            Message(new UI.Message("You are using YoutubeEnchanted v" + Application.ProductVersion.Substring(0, 5)));
             do
             {
                 try
                 {
-                 
-       
-                    
+
+                    if (APICore.FullScreen && this.FormBorderStyle == FormBorderStyle.Sizable)
+                    { pictureBox7.Visible = true; this.FormBorderStyle = FormBorderStyle.None; this.TopMost = true; }
+                    else if (APICore.FullScreen == false) { pictureBox7.Visible = false; this.FormBorderStyle = FormBorderStyle.Sizable; this.TopMost = false; }
                     if (APICore.ShowPlayControlMenu)
                     {
                         //APICore.PARSED_URL = false;
@@ -94,10 +104,11 @@ namespace YoutubeEnchanted.UI
                                     pictureBox1.BackgroundImage = global::YoutubeEnchanted.Properties.Resources.StopIcon;
                                     break;
                             }
-                            
+
 
                         }
-                        else {
+                        else
+                        {
                             pictureBox4.Visible = true;
                             label6.Visible = true;
                             label4.Visible = true;
@@ -129,29 +140,30 @@ namespace YoutubeEnchanted.UI
                             this.videoPlayCore.VlcMediaplayerOptions = null;
 
                             this.panel2.Controls.Add(videoPlayCore);
-                            
+
                             videoPlayCore.TimeChanged += VideoPlayCore_TimeChanged;
                             videoPlayCore.Log += VideoPlayCore_Log;
                             ((System.ComponentModel.ISupportInitialize)(this.videoPlayCore)).EndInit();
                             this.panel2.ResumeLayout();
                             pictureBox1.BackgroundImage = global::YoutubeEnchanted.Properties.Resources.PauseIcon;
                             videoPlayCore.Play(APICore._PARSE_URL);
-                            UpdateVideo(APICore.NOW_URL,APICore.Topic);
-                            label5.Text = APICore.VideoDes;
-                           
 
-                            label4.Text= APICore.Title;
+                            UpdateVideo(APICore.NOW_URL, APICore.Topic);
+                            label5.Text = APICore.VideoDes;
+
+
+                            label4.Text = APICore.Title;
                             UpdateVideoAuthor(APICore.Topic);
                             API.APICore.Log("Playing " + APICore._PARSE_URL);
                         }
-                        
+
                     }
                     else
                     {
                         label6.Visible = false;
-                        label4.Visible =false;
+                        label4.Visible = false;
                         label5.Visible = false;
-                        label3.Visible= false;
+                        label3.Visible = false;
                         pictureBox4.Visible = false;
                         flowLayoutPanel1.Visible = false;
                         label2.Visible = false;
@@ -194,9 +206,9 @@ namespace YoutubeEnchanted.UI
                 try
                 {
                     var vid = await yt.Videos.GetAsync(vidUrl);
-                   
+
                     var us = await yt.Channels.GetAsync(vid.Author.ChannelUrl);
-                    label6.Text= us.Title;
+                    label6.Text = us.Title;
                     pictureBox4.LoadAsync(us.Thumbnails[0].Url);
 
                 }
@@ -213,7 +225,7 @@ namespace YoutubeEnchanted.UI
             colorSlider1.Maximum = videoPlayCore.Length / 1000;
             colorSlider1.Value = videoPlayCore.Time / 1000;
             colorSlider2.Value = videoPlayCore.Audio.Volume;
-            label1.Text=APICore.ToFriendllyTime(videoPlayCore.Time)+"/"+APICore.ToFriendllyTime(videoPlayCore.Length);
+            label1.Text = APICore.ToFriendllyTime(videoPlayCore.Time) + "/" + APICore.ToFriendllyTime(videoPlayCore.Length);
         }
         private void panel2_Paint(object sender, PaintEventArgs e)
         {
@@ -221,6 +233,11 @@ namespace YoutubeEnchanted.UI
         }
         private void colorSlider1_Scroll(object sender, ScrollEventArgs e)
         {
+            if (videoPlayCore.State == Vlc.DotNet.Core.Interops.Signatures.MediaStates.Ended)
+            {
+                videoPlayCore.Play(_PARSE_URL);
+            }
+            else { videoPlayCore.Time = long.Parse(colorSlider1.Value.ToString()) * 1000; }
 
         }
         private async void panel1_VisibleChanged(object sender, EventArgs e)
@@ -252,22 +269,23 @@ namespace YoutubeEnchanted.UI
         {
             APICore.ShowPlayControlMenu = false;
         }
-        Point panel3ctrlPoint = new Point(10,10);
+        Point panel3ctrlPoint = new Point(10, 10);
+
         private void panel3_ControlAdded(object sender, ControlEventArgs e)
         {
-            
-            e.Control.Anchor= AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left|AnchorStyles.Right;
-            e.Control.Size =new Size(panel3.Size.Width-20,panel3.Height-20);
-            e.Control.Location =panel3ctrlPoint;
-            panel3ctrlPoint = new Point(0,panel3ctrlPoint.Y+e.Control.Height);
+
+            e.Control.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            e.Control.Size = new Size(panel3.Size.Width - 20, panel3.Height - 20);
+            e.Control.Location = panel3ctrlPoint;
+            panel3ctrlPoint = new Point(0, panel3ctrlPoint.Y + e.Control.Height);
             panel3.Visible = true;
             foreach (Control ctrl in this.Controls)
             {
                 if (ctrl != panel3)
                 { ctrl.Enabled = false; }
-            
+
             }
-            panel3.Enabled= true;
+            panel3.Enabled = true;
         }
 
         private void label2_Click(object sender, EventArgs e)
@@ -287,17 +305,28 @@ namespace YoutubeEnchanted.UI
 
         private void BGN_VIDEO_KeyUp(object sender, KeyEventArgs e)
         {
-            switch(e.KeyCode) 
+            APICore.Log("User Press " + e.KeyData.ToString());
+            switch (e.KeyCode)
             {
+
                 case Keys.Enter:
                     MainSec.StartSerch(textBox1.Text);
                     textBox1.Text = "";
                     break;
                 case Keys.Space:
-                    try { videoPlayCore.Pause(); } catch(Exception ex) { APICore.Log("User Press Space but "+ex.Message); APICore.Log(ex.StackTrace); }
+                    try { videoPlayCore.Pause(); } catch (Exception ex) { APICore.Log("User Press Space but " + ex.Message); APICore.Log(ex.StackTrace); }
+                    break;
+                case Keys.Left:
+                    videoPlayCore.Time = videoPlayCore.Time - 10000;
+                    break;
+                case Keys.Right:
+                    videoPlayCore.Time = videoPlayCore.Time + 10000;
+                    break;
+                case Keys.F11:
+                    APICore.FullScreen = APICore.ToggleBool(APICore.FullScreen);
                     break;
 
-          
+
             }
         }
 
@@ -316,8 +345,230 @@ namespace YoutubeEnchanted.UI
 
         private void flowLayoutPanel1_ControlRemoved(object sender, ControlEventArgs e)
         {
-            try { flowLayoutPanel1.Controls[-1].Location = e.Control.Location; } catch(Exception ex) { APICore.Log(ex.Message);APICore.Log(ex.StackTrace); }
-  
+            try { flowLayoutPanel1.Controls[-1].Location = e.Control.Location; } catch (Exception ex) { APICore.Log(ex.Message); APICore.Log(ex.StackTrace); }
+
+        }
+        bool Downloading = false;
+        
+        private async void pictureBox6_Click(object sender, EventArgs e)
+        {
+
+            if (Downloading)
+            {
+
+               
+            }
+            else
+            {
+                Message(new UI.Message("Download Video Feature is temporary Removed due to high-non statble"));
+                /*
+                Downloading = true;
+                var youtube = new YoutubeClient(APICore.HttpClient());
+                string ProcessTitle = APICore.Title;
+                foreach (var badName in Path.GetInvalidFileNameChars())
+                {
+                    ProcessTitle = ProcessTitle.Replace(badName.ToString(), " ");
+                }
+                SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+                
+                saveFileDialog1.Filter = "Video files (*.mp4)|*.txt|All files (*.*)|*.*";
+                saveFileDialog1.FilterIndex = 2;
+                saveFileDialog1.OverwritePrompt = true;
+                saveFileDialog1.RestoreDirectory = true;
+                saveFileDialog1.FileName = ProcessTitle;
+
+                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    string TItle = APICore.Title;
+                    try
+                    {
+                        Message(new UI.Message("Downloading " + TItle));
+                        var streamManifest = await youtube.Videos.Streams.GetManifestAsync(
+                            APICore.NOW_URL
+                        );
+
+                        // Select streams (1080p60 / highest bitrate audio)
+                        var audioStreamInfo = streamManifest.GetAudioStreams().GetWithHighestBitrate();
+                        var videoStreamInfo = streamManifest.GetVideoStreams().TryGetWithHighestBitrate();
+                        var streamInfos = new IStreamInfo[] { audioStreamInfo, videoStreamInfo };
+
+                        // Download and process them into one file
+                        await youtube.Videos.DownloadAsync(streamInfos, new ConversionRequestBuilder(saveFileDialog1.FileName).Build());
+                        Message(new UI.Message("Video have saved to " + saveFileDialog1.FileName));
+                    }
+                    catch { Message(new UI.Message("Cannot Download Video " + TItle)); }
+                    Downloading = false;
+                }
+                Downloading = false;*/
+
+            }
+
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
+        public void Message(Control ctrl)
+        {
+            flowLayoutPanel2.Controls.Add(ctrl);
+        }
+        private async void flowLayoutPanel2_ControlAdded(object sender, ControlEventArgs e)
+        {
+            e.Control.Location = new Point(10, 10);
+            flowLayoutPanel2.Visible = true;
+            await Task.Delay(5000);
+            flowLayoutPanel2.Controls.Remove(e.Control);
+            flowLayoutPanel2.Visible = false;
+        }
+
+        private void pictureBox7_MouseEnter(object sender, EventArgs e)
+        {
+            pictureBox8.Visible = true;
+            //panel4.Visible = true;
+        }
+
+        private async void pictureBox8_VisibleChanged(object sender, EventArgs e)
+        {
+            await Task.Delay(3000);
+            pictureBox8.Visible = false;
+        }
+
+        private void pictureBox8_Click(object sender, EventArgs e)
+        {
+            pictureBox8.Visible = false;
+            APICore.FullScreen = false;
+        }
+
+        private void pictureBox8_Paint(object sender, PaintEventArgs e)
+        {
+            GraphicsPath g = new GraphicsPath();
+            g.AddEllipse(0, 0, pictureBox8.Width, pictureBox8.Height);
+            pictureBox8.Region = new System.Drawing.Region(g);
+
+        }
+
+        Pen pen = new Pen(Color.White, 2.0f);
+        float penWidth = 2.0f;
+        int _edge = 20;
+        Color _borderColor = Color.White;
+        public int Edge
+        {
+            get
+            {
+                return _edge;
+            }
+            set
+            {
+                _edge = value;
+                Invalidate();
+            }
+        }
+
+        public Color BorderColor
+        {
+            get
+            {
+                return _borderColor;
+            }
+            set
+            {
+                _borderColor = value;
+                pen = new Pen(_borderColor, penWidth);
+                Invalidate();
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+      
+            //DrawBorder(e.Graphics);
+        }
+
+        private void ExtendedDraw(PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            GraphicsPath path = new GraphicsPath();
+
+            path.StartFigure();
+            path.StartFigure();
+            path.AddArc(GetLeftUpper(Edge), 180, 90);
+            path.AddLine(Edge, 0, Width - Edge, 0);
+            path.AddArc(GetRightUpper(Edge), 270, 90);
+            path.AddLine(Width, Edge, Width, Height - Edge);
+            path.AddArc(GetRightLower(Edge), 0, 90);
+            path.AddLine(Width - Edge, Height, Edge, Height);
+            path.AddArc(GetLeftLower(Edge), 90, 90);
+            path.AddLine(0, Height - Edge, 0, Edge);
+            path.CloseFigure();
+
+            Region = new Region(path);
+        }
+
+        Rectangle GetLeftUpper(int e)
+        {
+            return new Rectangle(0, 0, e, e);
+        }
+        Rectangle GetRightUpper(int e)
+        {
+            return new Rectangle(Width - e, 0, e, e);
+        }
+        Rectangle GetRightLower(int e)
+        {
+            return new Rectangle(Width - e, Height - e, e, e);
+        }
+        Rectangle GetLeftLower(int e)
+        {
+            return new Rectangle(0, Height - e, e, e);
+        }
+
+        void DrawSingleBorder(Graphics graphics)
+        {
+            graphics.DrawArc(pen, new Rectangle(0, 0, Edge, Edge), 180, 90);
+            graphics.DrawArc(pen, new Rectangle(Width - Edge - 1, -1, Edge, Edge), 270, 90);
+            graphics.DrawArc(pen, new Rectangle(Width - Edge - 1, Height - Edge - 1, Edge, Edge), 0, 90);
+            graphics.DrawArc(pen, new Rectangle(0, Height - Edge - 1, Edge, Edge), 90, 90);
+
+            graphics.DrawRectangle(pen, 0.0F, 0.0F, Width - 1, Height - 1);
+        }
+
+        void DrawBorder(Graphics graphics)
+        {
+            DrawSingleBorder(graphics);
+        }
+
+        private void flowLayoutPanel2_Paint(object sender, PaintEventArgs e)
+        {
+            flowLayoutPanel2.Region = System.Drawing.Region.FromHrgn(CreateRoundRectRgn(0, 0,flowLayoutPanel2.Width,flowLayoutPanel2.Height, 20, 20));
+
+        }
+        [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
+        private static extern IntPtr CreateRoundRectRgn
+(
+    int nLeftRect,     // x-coordinate of upper-left corner
+    int nTopRect,      // y-coordinate of upper-left corner
+    int nRightRect,    // x-coordinate of lower-right corner
+    int nBottomRect,   // y-coordinate of lower-right corner
+    int nWidthEllipse, // width of ellipse
+    int nHeightEllipse // height of ellipse
+);
+
+        private void BGN_VIDEO_Resize(object sender, EventArgs e)
+        {
+            //Region = System.Drawing.Region.FromHrgn(CreateRoundRectRgn(0, 0, Width, Height, 20, 20));
+        }
+
+        private void pictureBox7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private async void panel4_VisibleChanged(object sender, EventArgs e)
+        {
+            await Task.Delay(5000);
+            //panel4.Visible = false;
         }
     }
 }

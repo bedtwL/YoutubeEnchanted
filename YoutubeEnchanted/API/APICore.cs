@@ -29,6 +29,7 @@ namespace YoutubeEnchanted.API
         public static List<string> UPDATED_LIST = new List<string>();
         public static int VideoINDEX = 0;
         public static bool CloseFirstW=false;
+        public static bool FullScreen = false;
         //public static VlcControl videoPlayCore = new VlcControl() { Dock = DockStyle.Fill, VlcLibDirectory = new System.IO.DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "VLCLIBx64") };
         public static bool ShowPlayControlMenu = false;
         //public static void ResetCore()
@@ -36,6 +37,13 @@ namespace YoutubeEnchanted.API
         //videoPlayCore.Dispose();
         //videoPlayCore=new VlcControl() { Dock = DockStyle.Fill, VlcLibDirectory = new System.IO.DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "VLCLIBx64") };
         //}
+        public static bool ToggleBool(bool Toggle)
+        {
+            if (Toggle)
+            { Toggle = false; }
+            else { Toggle = true; }
+            return Toggle;
+        }
         public static HttpClient HttpClient()
         {
             HttpClientHandler handler = new HttpClientHandler();
@@ -111,7 +119,7 @@ namespace YoutubeEnchanted.API
         public static void Log(string lines)
         {
             runtimelog = runtimelog + "\n[" + DateTime.Now.ToString() + "] " + lines;
-            try { System.IO.File.WriteAllText(Program.LogPath, runtimelog); } catch(Exception ex) { Log(ex.Message);Log(ex.StackTrace); }
+            try { System.IO.File.WriteAllText(Program.LogPath, runtimelog); } catch{/* Log(ex.Message);Log(ex.StackTrace);*/ }
            
         }
         public static async void ParseUrl(string url)
@@ -123,9 +131,10 @@ namespace YoutubeEnchanted.API
 
                 var youtube = new YoutubeExplode.YoutubeClient(APICore.HttpClient());
                 var streamManifest = await youtube.Videos.Streams.GetManifestAsync(url);
-                IVideoStreamInfo streamInfo;
-                try { streamInfo = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality();  } catch(Exception ex) { Program.errorForm = new ErrorUI.Common.UnknowError(ex);Program.error = true; return; }
-                PARSE_URL = streamInfo.Url;
+                try {var streamInfo = streamManifest.GetMuxedStreams().TryGetWithHighestVideoQuality(); PARSE_URL = streamInfo.Url; } catch(Exception ex) {
+                    API.APICore.Log(ex.Message);
+                    API.APICore.Log(ex.StackTrace); Program.Mainwindow.Message(new UI.Message("Cannot play youtube Video due to "+ex.Message));  return; }
+           
 
             }
             catch (YoutubeExplode.Exceptions.RequestLimitExceededException ex)
