@@ -6,3 +6,5 @@ A Enchantment by 12 years old developer
 Power by [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) and [VLCLIB](https://github.com/ZeBobo5/Vlc.DotNet)
 ## Feature:  
    Remove youtube ads (From OpenBeta v0.0.1)  
+## Feature need to change config
+   Add Custom Topic (in Topic.db, open with notepad)
