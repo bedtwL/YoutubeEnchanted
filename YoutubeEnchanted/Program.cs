@@ -19,11 +19,11 @@ namespace YoutubeEnchanted
         public static BGN_VIDEO Mainwindow;
         static void Main()
         {
-
+            System.IO.Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "Logs\\");
             //APICore.Play(Console.ReadLine());
             System.IO.File.WriteAllText(LogPath, "[" + DateTime.Now.ToString() + "] Log Started");
 
-            System.IO.Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory+"Logs\\");
+          
             API.APICore.Log("Youtube Enchanted "+ Application.ProductVersion.Substring(0, 5));
             RunWindow();
             

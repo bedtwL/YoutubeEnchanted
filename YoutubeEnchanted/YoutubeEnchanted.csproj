@@ -38,6 +38,9 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>YoutubeEnchanted-64x64.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="AngleSharp, Version=0.17.1.0, Culture=neutral, PublicKeyToken=e83494dcdc6d31ea, processorArchitecture=MSIL">
       <HintPath>..\packages\AngleSharp.0.17.1\lib\net472\AngleSharp.dll</HintPath>
@@ -140,6 +143,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\BetterTextbox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="UI\BGN_VIDEO.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -275,6 +281,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Close.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="YoutubeEnchanted-64x64.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
